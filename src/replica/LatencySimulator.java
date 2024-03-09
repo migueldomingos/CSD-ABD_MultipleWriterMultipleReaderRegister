@@ -14,10 +14,13 @@ public class LatencySimulator {
     private static final float SUCCESS_PROBABILITY = 0.02f;
 
     @SneakyThrows
-    public static void simulateLatency() {
+    public static int simulateLatency() {
+        int waitTime = 0;
         do {
             Thread.sleep(SLEEP_INTERVAL);
+            waitTime += SLEEP_INTERVAL;
         } while (Math.random() > SUCCESS_PROBABILITY);
+        return waitTime;
     }
 
 }

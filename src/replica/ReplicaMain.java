@@ -1,5 +1,7 @@
 package replica;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 
@@ -9,7 +11,13 @@ import static replica.RegisterSingleton.RegisterType.*;
 
 public class ReplicaMain {
 
+    static {
+        System.setProperty("log4j.configurationFile", "config/log4j2.xml");
+    }
+
     public static final String BASE_URI = "http://localhost:%d/";
+
+    private static final Logger logger = LogManager.getLogger(ReplicaMain.class);
 
     public static void main(String[] args) throws Exception {
         if (args.length < 2) {
@@ -20,9 +28,11 @@ public class ReplicaMain {
             System.exit(-1);
         }
         int port = Integer.parseInt(args[0]);
+        String uri = String.format(BASE_URI, port);
+        logger.info("Initializing server on URL: {}", uri);
         RegisterSingleton.RegisterType type = RegisterSingleton.RegisterType.values()[Integer.parseInt(args[1])];
         RegisterSingleton.setRegister(type);
-        String uri = String.format(BASE_URI, port);
+        logger.info("Instantiating register with type: {}", type.name());
         ResourceConfig config = new ResourceConfig(Endpoint.class);
         JdkHttpServerFactory.createHttpServer(URI.create(uri), config);
     }
