@@ -20,13 +20,8 @@ public class CrashRegister implements Register {
 
     @Override
     @SneakyThrows
-    public void setTimestamp(int timestamp) {
+    public void updateRegister(int timestamp, float value) {
         Thread.sleep(Integer.MAX_VALUE);
     }
 
-    @Override
-    @SneakyThrows
-    public void setValue(float value) {
-        Thread.sleep(Integer.MAX_VALUE);
-    }
 }

@@ -17,12 +17,8 @@ public class ByzantineRegister implements Register {
     }
 
     @Override
-    public void setTimestamp(int timestamp) {
-        // I decide my own timestamp :)
-    }
-
-    @Override
-    public void setValue(float value) {
+    public void updateRegister(int timestamp, float value) {
         // Uhm, I don't think so...
     }
+
 }

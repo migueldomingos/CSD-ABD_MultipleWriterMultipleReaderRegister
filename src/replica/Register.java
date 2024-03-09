@@ -6,8 +6,6 @@ public interface Register {
 
     float getValue();
 
-    void setTimestamp(int timestamp);
-
-    void setValue(float value);
+    void updateRegister(int timestamp, float value);
 
 }
