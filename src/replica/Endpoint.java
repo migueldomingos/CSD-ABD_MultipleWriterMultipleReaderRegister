@@ -2,7 +2,7 @@ package replica;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-import org.apache.commons.lang3.tuple.Pair;
+import pojos.RegisterContentPojo;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -21,15 +21,15 @@ public class Endpoint {
         float value = register.getValue();
         System.out.println("Reading timestamp: " + timestamp + " value: " + value);
         LatencySimulator.simulateLatency();
-        return Response.ok(Pair.of(timestamp, value)).build();
+        return Response.ok(new RegisterContentPojo(timestamp, value)).build();
     }
 
     @POST
     @Path("write")
     @Consumes(APPLICATION_JSON)
-    public Response write(Pair<Integer, Float> pair) {
-        register.setTimestamp(pair.getLeft());
-        register.setValue(pair.getRight());
+    public Response write(RegisterContentPojo registerContent) {
+        register.setTimestamp(registerContent.getTimestamp());
+        register.setValue(registerContent.getValue());
         LatencySimulator.simulateLatency();
         return Response.ok().build();
     }
