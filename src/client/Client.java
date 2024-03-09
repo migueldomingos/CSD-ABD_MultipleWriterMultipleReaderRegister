@@ -75,11 +75,24 @@ public class Client {
                 .orElseThrow(() -> new IllegalStateException("No responses received"));
     }
 
+    @SneakyThrows
     public void write(float value) {
         logger.trace("Issuing write request with value: {}", value);
+        BlockingQueue<Boolean> responses = new LinkedBlockingQueue<>();
+        int numResponses = 0;
         RegisterContentPojo registerContent = new RegisterContentPojo(timestamp, value);
-        targets.get(0).path("write").request().post(Entity.entity(registerContent, APPLICATION_JSON_TYPE));
+        for (WebTarget target : targets)
+            new Thread(() -> writeToReplica(target, registerContent, responses)).start();
+        while (numResponses < writeQuorum) {
+            responses.take();
+            numResponses++;
+        }
         timestamp++;
         logger.debug("Incremented timestamp to: {}", timestamp);
+    }
+
+    private void writeToReplica(WebTarget target, RegisterContentPojo registerContent, BlockingQueue<Boolean> responses) {
+        target.path("write").request().post(Entity.entity(registerContent, APPLICATION_JSON_TYPE));
+        responses.add(true);
     }
 }
