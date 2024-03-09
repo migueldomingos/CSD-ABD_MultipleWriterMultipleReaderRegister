@@ -1,6 +1,6 @@
 package replica;
 
-public class FaultyRegister implements Register {
+public class ByzantineRegister implements Register {
 
     private static final float FAULTY_VALUE = Float.MAX_VALUE;
 

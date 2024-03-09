@@ -3,17 +3,16 @@ package replica;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-
 import org.apache.commons.lang3.tuple.Pair;
-
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Path("")
 public class Endpoint {
 
-    private final Register register = new CorrectRegister();
+    private final Register register = RegisterSingleton.getRegister();
 
+    public Endpoint() throws Exception {}
 
     @GET
     @Path("read")
