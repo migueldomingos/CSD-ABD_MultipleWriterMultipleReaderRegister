@@ -1,9 +1,7 @@
 package replica;
 
 
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -16,12 +14,8 @@ public class Endpoint {
 
     private final Register register = new CorrectRegister();
 
-    @Path("")
-    public Response ping() {
-        System.out.println("Received ping");
-        return Response.ok("pong").build();
-    }
 
+    @GET
     @Path("read")
     @Produces(APPLICATION_JSON)
     public Response read() {
@@ -31,12 +25,13 @@ public class Endpoint {
         return Response.ok(Pair.of(timestamp, value)).build();
     }
 
-    /*@Path("write")
+    @POST
+    @Path("write")
     @Consumes(APPLICATION_JSON)
     public Response write(Pair<Integer, Float> pair) {
         register.setTimestamp(pair.getLeft());
         register.setValue(pair.getRight());
         return Response.ok().build();
-    }*/
+    }
 
 }
