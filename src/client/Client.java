@@ -3,9 +3,19 @@ package client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
+import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pojos.RegisterContentPojo;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 
@@ -13,23 +23,62 @@ public class Client {
 
     private static final Logger logger = LogManager.getLogger(Client.class);
 
-    private final WebTarget target;
+    private final List<WebTarget> targets;
     
     private int timestamp = 0;
 
-    public Client(String targetUrl) {
-        this.target = ClientBuilder.newClient().target(targetUrl);
+    private final int readQuorum;
+
+    private final int writeQuorum;
+
+    public Client() throws IOException {
+        Properties props = new Properties();
+        props.load(Files.newInputStream(Paths.get("config/config.properties")));
+        this.readQuorum = Integer.parseInt(props.getProperty("read_quorum", "5"));
+        this.writeQuorum = Integer.parseInt(props.getProperty("write_quorum", "5"));
+        int numReplicas = Integer.parseInt(props.getProperty("num_replicas", "10"));
+        int startPort = Integer.parseInt(props.getProperty("start_port", "8080"));
+        targets = new ArrayList<>(numReplicas);
+        for (int i = 0; i < numReplicas; i++) {
+            targets.add(ClientBuilder.newClient().target("http://localhost:" + (startPort + i)));
+        }
     }
 
+    @SneakyThrows
     public float read() {
         logger.trace("Issuing read request");
-        return target.path("read").request().get(RegisterContentPojo.class).getValue();
+        BlockingQueue<RegisterContentPojo> responses = new LinkedBlockingQueue<>();
+        List<RegisterContentPojo> quorumResponses = new ArrayList<>(readQuorum);
+        for (WebTarget target : targets)
+            new Thread(() -> readFromReplica(target, responses)).start();
+        while (quorumResponses.size() < readQuorum)
+            quorumResponses.add(responses.take());
+        return processReadQuorum(quorumResponses);
+    }
+
+    private static void readFromReplica(WebTarget target, BlockingQueue<RegisterContentPojo> responses) {
+        RegisterContentPojo registerContent = target.path("read").request().get(RegisterContentPojo.class);
+        logger.debug("Received read response from {} with timestamp: {}, value: {}",
+                target.getUri(), registerContent.getTimestamp(), registerContent.getValue());
+        responses.add(registerContent);
+    }
+
+    private static Float processReadQuorum(List<RegisterContentPojo> quorumResponses) {
+        int highestTimestamp = quorumResponses.stream()
+                .mapToInt(RegisterContentPojo::getTimestamp)
+                .max()
+                .orElseThrow(() -> new IllegalStateException("No responses received"));
+        return quorumResponses.stream()
+                .filter(response -> response.getTimestamp() == highestTimestamp)
+                .map(RegisterContentPojo::getValue)
+                .findAny()
+                .orElseThrow(() -> new IllegalStateException("No responses received"));
     }
 
     public void write(float value) {
         logger.trace("Issuing write request with value: {}", value);
         RegisterContentPojo registerContent = new RegisterContentPojo(timestamp, value);
-        target.path("write").request().post(Entity.entity(registerContent, APPLICATION_JSON_TYPE));
+        targets.get(0).path("write").request().post(Entity.entity(registerContent, APPLICATION_JSON_TYPE));
         timestamp++;
         logger.debug("Incremented timestamp to: {}", timestamp);
     }
