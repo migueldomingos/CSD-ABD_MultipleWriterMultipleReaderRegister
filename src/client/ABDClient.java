@@ -1,11 +1,29 @@
 package client;
 
+/*
+* Imports for network communication.
+* Establishes connections to the replicas and serializes/deserializes content.
+ */
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
+
+/*
+* Annotation library to simplify error handling.
+ */
 import lombok.SneakyThrows;
+
+/*
+* Logging library to log the client's actions.
+* The logger is configured in the log4j2.xml file.
+ */
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+/*
+* Pojo (Plain Old Java Object) to represent the content of the register.
+* Is serialized and deserialized to/from JSON without our intervention.
+ */
 import pojos.RegisterContentPojo;
 
 import java.io.IOException;

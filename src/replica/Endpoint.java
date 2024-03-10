@@ -1,13 +1,31 @@
 package replica;
 
+/*
+* These imports handle the RESTful API.
+ */
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
+
+/*
+* Logging library to log the replica's actions.
+* The logger is configured in the log4j2.xml file.
+ */
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+/*
+* Pojo (Plain Old Java Object) to represent the content of the register.
+* Is serialized and deserialized to/from JSON without our intervention.
+ */
 import pojos.RegisterContentPojo;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
+/**
+ *
+ * This class represents the endpoint of the replica.
+ * The endpoint is used to issue requests to the replica.
+ */
 @Path("")
 public class Endpoint {
 

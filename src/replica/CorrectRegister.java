@@ -35,6 +35,11 @@ public class CorrectRegister implements Register {
         return new RegisterContentPojo(timestamp, id, value);
     }
 
+    /*
+    * This method updates the register with the given timestamp, id, and value.
+    * A register is only updated if the given timestamp is greater than the current timestamp.
+    * If the timestamp is the same, the register is only updated if the given id is greater than the current id.
+     */
     @Override
     public void updateRegister(int timestamp, int id, float value) {
         if (timestamp > this.timestamp) {

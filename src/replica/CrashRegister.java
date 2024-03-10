@@ -3,6 +3,10 @@ package replica;
 import lombok.SneakyThrows;
 import pojos.RegisterContentPojo;
 
+/**
+ * Simulates a register that crashes after receiving a request
+ * The register will not respond to the request and will not update its state
+ */
 public class CrashRegister implements Register {
 
     @Override

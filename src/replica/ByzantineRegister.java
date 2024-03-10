@@ -2,6 +2,11 @@ package replica;
 
 import pojos.RegisterContentPojo;
 
+/**
+ * Simulates a register that is faulty and responds with incorrect values.
+ * It always returns the same value and id, and a timestamp of Integer.MAX_VALUE.
+ * A more insidious attack would be to return a correct timestamp and id, but a faulty value.
+ */
 public class ByzantineRegister implements Register {
 
     private static final float FAULTY_VALUE = Float.MAX_VALUE;
