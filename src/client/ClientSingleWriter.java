@@ -16,12 +16,13 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.stream.Collectors;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 
-public class Client {
+public class ClientSingleWriter {
 
-    private static final Logger logger = LogManager.getLogger(Client.class);
+    private static final Logger logger = LogManager.getLogger(ClientSingleWriter.class);
 
     private final List<WebTarget> targets;
     
@@ -31,7 +32,7 @@ public class Client {
 
     private final int writeQuorum;
 
-    public Client() throws IOException {
+    public ClientSingleWriter() throws IOException {
         Properties props = new Properties();
         props.load(Files.newInputStream(Paths.get("config/config.properties")));
         this.readQuorum = Integer.parseInt(props.getProperty("read_quorum", "5"));
@@ -68,10 +69,17 @@ public class Client {
                 .mapToInt(RegisterContentPojo::getTimestamp)
                 .max()
                 .orElseThrow(() -> new IllegalStateException("No responses received"));
-        return quorumResponses.stream()
-                .filter(response -> response.getTimestamp() == highestTimestamp)
+        List<RegisterContentPojo> highTimestampResponses = quorumResponses.stream()
+                .filter(r -> r.getTimestamp() == highestTimestamp)
+                .collect(Collectors.toList());
+        int lowestId = highTimestampResponses.stream()
+                .mapToInt(RegisterContentPojo::getId)
+                .min()
+                .orElseThrow(() -> new IllegalStateException("No responses received"));
+        return highTimestampResponses.stream()
+                .filter(r -> r.getId() == lowestId)
                 .map(RegisterContentPojo::getValue)
-                .findAny()
+                .findFirst()
                 .orElseThrow(() -> new IllegalStateException("No responses received"));
     }
 
@@ -80,7 +88,7 @@ public class Client {
         logger.trace("Issuing write request with value: {}", value);
         BlockingQueue<Boolean> responses = new LinkedBlockingQueue<>();
         int numResponses = 0;
-        RegisterContentPojo registerContent = new RegisterContentPojo(timestamp, value);
+        RegisterContentPojo registerContent = new RegisterContentPojo(timestamp, 0, value);
         for (WebTarget target : targets)
             new Thread(() -> writeToReplica(target, registerContent, responses)).start();
         while (numResponses < writeQuorum) {

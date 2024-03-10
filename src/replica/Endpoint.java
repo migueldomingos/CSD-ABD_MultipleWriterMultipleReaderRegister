@@ -25,19 +25,18 @@ public class Endpoint {
     public Response read() {
         int waitTimeReceive = LatencySimulator.simulateLatency();
         logger.debug("Simulated latency of receiving request: {}ms", waitTimeReceive);
-        int timestamp = register.getTimestamp();
-        float value = register.getValue();
-        logger.debug("Reading timestamp: {}, value: {}", timestamp, value);
+        RegisterContentPojo pojo = register.getRegisterContent();
+        logger.debug("Reading timestamp: {}, value: {}", pojo.getTimestamp(), pojo.getValue());
         int waitTimeSend = LatencySimulator.simulateLatency();
         logger.debug("Simulated latency of sending response: {}ms", waitTimeSend);
-        return Response.ok(new RegisterContentPojo(timestamp, value)).build();
+        return Response.ok(pojo).build();
     }
 
     @POST
     @Path("write")
     @Consumes(APPLICATION_JSON)
     public Response write(RegisterContentPojo registerContent) {
-        register.updateRegister(registerContent.getTimestamp(), registerContent.getValue());
+        register.updateRegister(registerContent.getTimestamp(), registerContent.getId(), registerContent.getValue());
         int waitTimeReceive = LatencySimulator.simulateLatency();
         logger.debug("Simulated latency of receiving request: {}ms", waitTimeReceive);
         logger.debug("Writing timestamp: {}, value: {}",

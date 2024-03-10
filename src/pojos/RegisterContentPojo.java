@@ -11,5 +11,6 @@ import lombok.Setter;
 @Getter
 public class RegisterContentPojo {
     private int timestamp;
+    private int id;
     private float value;
 }

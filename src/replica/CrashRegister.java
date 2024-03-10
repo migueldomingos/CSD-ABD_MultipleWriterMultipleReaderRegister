@@ -1,26 +1,20 @@
 package replica;
 
 import lombok.SneakyThrows;
+import pojos.RegisterContentPojo;
 
 public class CrashRegister implements Register {
 
     @Override
     @SneakyThrows
-    public int getTimestamp() {
+    public RegisterContentPojo getRegisterContent() {
         Thread.sleep(Integer.MAX_VALUE);
-        return 0;
+        return null;
     }
 
     @Override
     @SneakyThrows
-    public float getValue() {
-        Thread.sleep(Integer.MAX_VALUE);
-        return 0;
-    }
-
-    @Override
-    @SneakyThrows
-    public void updateRegister(int timestamp, float value) {
+    public void updateRegister(int timestamp, int id, float value) {
         Thread.sleep(Integer.MAX_VALUE);
     }
 

@@ -1,11 +1,11 @@
 package replica;
 
+import pojos.RegisterContentPojo;
+
 public interface Register {
 
-    int getTimestamp();
+    RegisterContentPojo getRegisterContent();
 
-    float getValue();
-
-    void updateRegister(int timestamp, float value);
+    void updateRegister(int timestamp, int id, float value);
 
 }
