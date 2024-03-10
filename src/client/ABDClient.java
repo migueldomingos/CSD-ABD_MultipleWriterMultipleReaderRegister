@@ -26,14 +26,27 @@ public class ABDClient {
 
     private static final Logger logger = LogManager.getLogger(ABDClient.class);
 
+    /*
+    * This list contains the web targets of the replicas.
+    * The web targets are used to issue requests to the replicas.
+    */
     private final List<WebTarget> targets;
 
     private final int readQuorum;
 
     private final int writeQuorum;
 
+    /*
+    * This integer represents the writer ID.
+    * The writer ID is used to identify the client that wrote the content.
+    * The writer ID is used to break ties when multiple contents have the same timestamp.
+    */
     private final int writerId;
 
+    /*
+    * This constructor initializes the ABD client.
+    * The constructor reads the configuration file and initializes the web targets.
+     */
     public ABDClient(int writerId) throws IOException {
         this.writerId = writerId;
         Properties props = new Properties();
@@ -48,6 +61,12 @@ public class ABDClient {
         }
     }
 
+
+    /*
+    * This method is used to read from the distributed register.
+    * The method issues a read request to a quorum of replicas.
+    * The method then processes the responses and helps the replicas by broadcasting the highest timestamp response.
+    */
     public float read() {
         logger.info("Issuing read request");
         logger.trace("Reading from quorum");
@@ -60,6 +79,12 @@ public class ABDClient {
         return result.getValue();
     }
 
+    /*
+    * This method is used to get the most updated content from a quorum of responses.
+    * The most updated content is the one with the highest timestamp.
+    * If there are multiple contents with the highest timestamp, the one with the lowest writer ID is chosen.
+    * If the quorum sizes are well-chosen, the no inconsistencies should arise between client reads.
+    */
     private RegisterContentPojo getMostUpdatedContent(Collection<RegisterContentPojo> quorumResponses) {
         int highestTimestamp = quorumResponses.stream()
                 .mapToInt(RegisterContentPojo::getTimestamp)
@@ -78,6 +103,12 @@ public class ABDClient {
                 .orElseThrow(() -> new IllegalStateException("No result found"));
     }
 
+    /*
+    * This method is used to write to the distributed register.
+    * The method issues a write request to a quorum of replicas.
+    * Initially, the method reads the most updated timestamp from the replicas.
+    * It then writes a new value with a timestamp higher than the most updated timestamp read.
+     */
     public void write(float value) {
         logger.info("Issuing write request");
         logger.trace("Reading most updated timestamp");
@@ -108,6 +139,11 @@ public class ABDClient {
         return quorumResponses;
     }
 
+    /*
+     * This method is used to read from a replica.
+     * The response is stored in the responses queue.
+     * Because the responses queue is a blocking queue, the main thread will wait until a response is received.
+     */
     private static void readFromReplica(WebTarget target, BlockingQueue<RegisterContentPojo> responses) {
         RegisterContentPojo registerContent = target.path("read").request().get(RegisterContentPojo.class);
         logger.debug("Received read response from {} with timestamp: {}, value: {}",
@@ -128,6 +164,11 @@ public class ABDClient {
         }
     }
 
+    /*
+     * This method is used to write to a replica.
+     * The response is stored in the responses queue.
+     * Because the responses queue is a blocking queue, the main thread will wait until a response is received.
+     */
     private void writeToReplica(WebTarget target, RegisterContentPojo registerContent, BlockingQueue<Boolean> responses) {
         target.path("write").request().post(Entity.entity(registerContent, APPLICATION_JSON_TYPE));
         responses.add(true);
