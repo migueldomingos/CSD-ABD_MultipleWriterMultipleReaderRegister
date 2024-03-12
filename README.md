@@ -1,6 +1,6 @@
-# CSD - Single Writer Multiple Reader Register
+# CSD - ABD Multiple Write Multiple Reader Distributed Register
 
-This project is the basis of an exercise the second lab class of the Distributed System Reliability (Confiabilidade de Sistemas Distribuidos - CSD) graduate course.
+This project is the basis of an exercise the for the first lab class of the Dependable Distributed Systems (Confiabilidade de Sistemas Distribuidos - CSD) graduate course.
 In this Java project we have the code of a server that contains a register (simple float value) and the code of clients who can interact with the servers.
 
 The system model we simulate is one where servers can fail, clients are spread across the world, and the network is asynchronous.
