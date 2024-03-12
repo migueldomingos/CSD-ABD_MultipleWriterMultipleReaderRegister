@@ -22,12 +22,10 @@ The objective of this exercise is to modify the client code to support byzantine
 Study the effects of different quorum sizes and fault thresholds in the performance of the system.
 Can we trigger a state inconsistency if we choose wrong quorum sizes?
 
-## Potential Homework
+## Background
 
-The service provided only supports a single writer, however, with small modifications to the client protocol we could implement the ABD protocol, allowing multiple writters to update the registers concurrently.
+The service provided only supports multiple concurrent writers and readers by implementing the ABD protocol.
 The algorithm is described in the paper: [Sharing memory robustly in message-passing systems](https://dl.acm.org/doi/10.1145/200836.200869)
-
-How good is the performance of ABD when compared with our baseline protocol?
 
 ## Technical Description
 
@@ -40,6 +38,11 @@ In config/log4j2.xml we define the configuration of the logger.
 By default the logging is very fine grained. If this becomes bothersome, change the root level from "trace" to "info" or "warn".
 
 ### Launch
+
+To compile the project a Java version equal or greater than 8 is necessary.
+It's also necessary to have Maven installed.
+
+Running **mvn install** will create a JAR file in the **target** directory.
 
 There is a script called launchReplicas.sh that creates a jar of the project and runs the replicas.
 By default, the first replica starts at port 8080 and the following replicas have contiguous ports.
