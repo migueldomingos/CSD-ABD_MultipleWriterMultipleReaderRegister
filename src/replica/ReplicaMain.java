@@ -23,7 +23,7 @@ public class ReplicaMain {
         if (args.length < 2) {
             System.out.println("Usage: java ReplicaMain <port> <registerType>");
             System.out.println("port: The port to listen on.");
-            System.out.printf("registerType: %d -> Correct, %d -> Crash, %d -> Byzantine.",
+            System.out.printf("registerType: %d -> Correct, %d -> Crash, %d -> Byzantine.\n",
                     CORRECT.ordinal(), CRASH.ordinal(), BYZANTINE.ordinal());
             System.exit(-1);
         }
